@@ -21,8 +21,6 @@ crawlDirectory(
     (filePath: string) => {
         const relativeFilePath = filePath.replace(webContentPath + "/", "");
 
-        console.log(relativeFilePath);
-
         new aws.s3.BucketObject(
             relativeFilePath,
             {
