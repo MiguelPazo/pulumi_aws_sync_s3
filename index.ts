@@ -1,14 +1,18 @@
 /**
  * Created by Miguel Pazo (https://miguelpazo.com)
  */
-
 import * as pulumi from "@pulumi/pulumi";
+import {local} from "@pulumi/command";
 import * as aws from "@pulumi/aws";
 import * as fs from "fs";
 import * as mime from "mime";
 import * as path from "path";
 import * as config from "./config";
 
+
+/**
+ * Getting bucket for static content and upload content
+ */
 const mainBucket = aws.s3.getBucket({
     bucket: config.bucketName,
 });
@@ -16,12 +20,14 @@ const mainBucket = aws.s3.getBucket({
 const webContentPath = path.join(process.cwd(), 'data');
 console.log("Syncing contents from local disk at", webContentPath);
 
+let bucketLastObject;
+
 crawlDirectory(
     webContentPath,
     (filePath: string) => {
         const relativeFilePath = filePath.replace(webContentPath + "/", "");
 
-        new aws.s3.BucketObject(
+        bucketLastObject = new aws.s3.BucketObject(
             relativeFilePath,
             {
                 key: relativeFilePath,
@@ -48,4 +54,18 @@ function crawlDirectory(dir: string, f: (_: string) => void) {
             f(filePath);
         }
     }
+}
+
+/**
+ * Invalidating CDN
+ */
+if (config.cloudfrontId) {
+    new local.Command("invalidate", {
+        create: pulumi.interpolate`aws cloudfront create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
+        environment: {
+            ETAG: bucketLastObject.etag
+        }
+    }, {
+        replaceOnChanges: ["environment"]
+    });
 }

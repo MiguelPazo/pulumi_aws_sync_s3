@@ -9,3 +9,4 @@ const configPulumi = new pulumi.Config();
 const env = pulumi.getStack();
 export const generalTagName = configPulumi.get("generalTagName");
 export const bucketName = configPulumi.get("bucketName");
+export const cloudfrontId = configPulumi.get("cloudfrontId");
