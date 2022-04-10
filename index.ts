@@ -60,12 +60,17 @@ function crawlDirectory(dir: string, f: (_: string) => void) {
  * Invalidating CDN
  */
 if (config.cloudfrontId) {
-    new local.Command("invalidate", {
+    const cInvalidate = new local.Command("invalidate", {
         create: pulumi.interpolate`aws cloudfront create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
         environment: {
             ETAG: bucketLastObject.etag
         }
     }, {
         replaceOnChanges: ["environment"]
+    });
+
+    cInvalidate.stderr.apply((err) => {
+        console.log('stderr:');
+        console.log(err);
     });
 }
