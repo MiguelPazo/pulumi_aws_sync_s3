@@ -63,7 +63,7 @@ if (config.cloudfrontId) {
     const cInvalidate = new local.Command("invalidate", {
         create: `aws cloudfront --region ${aws.config.region} create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
         environment: {
-            ETAG: bucketLastObject.etag
+            objectKey: (new Date().valueOf()).toString()
         }
     }, {
         replaceOnChanges: ["environment"]
