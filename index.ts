@@ -61,7 +61,7 @@ function crawlDirectory(dir: string, f: (_: string) => void) {
  */
 if (config.cloudfrontId) {
     const cInvalidate = new local.Command("invalidate", {
-        create: pulumi.interpolate`aws cloudfront create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
+        create: `aws cloudfront --region ${aws.config.region} create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
         environment: {
             ETAG: bucketLastObject.etag
         }
@@ -69,8 +69,13 @@ if (config.cloudfrontId) {
         replaceOnChanges: ["environment"]
     });
 
-    cInvalidate.stderr.apply((err) => {
+    cInvalidate.stderr.apply((stderr) => {
         console.log('stderr:');
-        console.log(err);
+        console.log(stderr);
+    });
+
+    cInvalidate.stdout.apply((stdout) => {
+        console.log('stdout:');
+        console.log(stdout);
     });
 }
