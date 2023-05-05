@@ -31,7 +31,6 @@ crawlDirectory(
             relativeFilePath,
             {
                 key: relativeFilePath,
-                acl: "public-read",
                 bucket: mainBucket.then(bucket => bucket.bucket),
                 contentType: mime.getType(filePath) || undefined,
                 source: new pulumi.asset.FileAsset(filePath),
@@ -60,7 +59,7 @@ function crawlDirectory(dir: string, f: (_: string) => void) {
  * Invalidating CDN
  */
 if (config.cloudfrontId) {
-    const cInvalidate = new local.Command("invalidate", {
+    const cInvalidate = new local.Command(`${config.project}-invalidate-cdn`, {
         create: `aws cloudfront --region ${aws.config.region} create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
         environment: {
             objectKey: (new Date().valueOf()).toString()
