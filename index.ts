@@ -61,7 +61,7 @@ function crawlDirectory(dir: string, f: (_: string) => void) {
  */
 if (config.cloudfrontId) {
     const cInvalidate = new local.Command("invalidate", {
-        create: `aws cloudfront --region ${aws.config.region} create-invalidation --distribution-id ${config.cloudfrontId} --paths /`,
+        create: `aws cloudfront --region ${aws.config.region} create-invalidation --distribution-id ${config.cloudfrontId} --paths /*`,
         environment: {
             objectKey: (new Date().valueOf()).toString()
         }
